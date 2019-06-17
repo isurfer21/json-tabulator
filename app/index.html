@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+
+<style id="webmakerstyle">
+body {
+  font-family: Calibri, Arial, Tahoma;
+}
+label {
+  display: block;
+  margin-top:10px;
+  font-weight:bold;
+  margin-bottom:3px;
+}
+#display {
+  margin: 10px 0;
+}
+table {
+  border-collapse: collapse;
+  margin: 3px 1px;
+}
+table th {
+  border: 1px solid darkgray;
+  background-color: gainsboro;
+  padding: 0 3px;
+}
+table td {
+  border: 1px solid darkgray;
+  padding: 0 3px;
+}
+</style>
+</head>
+<body>
+<div id="control">
+  <form>
+    <label>JSON content:</label>
+    <textarea name="content" rows="10" cols="80"></textarea>
+    <label>Orientation:</label>
+    <input type="radio" name="orientation" value="horizontal"> horizontal
+    <input type="radio" name="orientation" value="vertical"> vertical
+    <label></label>
+    <button type="submit">Submit</button>
+  </form>
+</div>
+<div id="display">
+  N/A
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script>
+$(function(){ 
+  var Table = {
+    vertical: function(data) {
+      var o = '<table>';
+      for(var i in data) {
+        o += '<tr><th>' + i + '</th>';
+        var c = (typeof data[i] == 'object') ? Table.vertical(data[i]) : data[i];
+        o += '<td>' + c + '</td></tr>';
+      }
+      o += '</table>';
+      return o;
+    },
+    horizontal: function(data) {
+      var o = '<table><tr>';
+      for(var i in data) {
+        o += '<th>' + i + '</th>';
+      }
+      o += '</tr><tr>';
+      for(var i in data) {
+        var c = (typeof data[i] == 'object') ? Table.horizontal(data[i]) : data[i];
+        o += '<td>' + c + '</td>';
+      }
+      o += '</tr></table>';
+      return o;
+    }
+  };
+  var submit = $('#control form button[type="submit"]');
+  submit.on('click', function(e) {
+    e.preventDefault();
+    var contentJsonAsStr = $('form textarea[name="content"]').val();
+    if (!!contentJsonAsStr) {
+      var contentJson = JSON.parse(contentJsonAsStr);
+      var tableOrientation = $('form input[name="orientation"]:checked').val(); 
+      var output = '';
+      switch(tableOrientation) {
+        case 'horizontal':
+          output = Table.horizontal(contentJson);
+          break;
+        case 'vertical':
+          output = Table.vertical(contentJson);
+          break;
+      }
+      $('#display').html(output);
+    } else {
+      $('#display').html('Error: JSON content is blank');
+    }
+  });
+});
+//# sourceURL=userscript.js
+</script>
+</body>
+</html>
